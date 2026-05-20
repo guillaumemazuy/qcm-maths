@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QCM Mathématiques Prépa</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 24px; font-family: Arial, sans-serif;
+      background: #f3f4f6; color: #111827; line-height: 1.6;
+    }
+    .container {
+      max-width: 1050px; margin: auto; background: white; padding: 28px;
+      border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    h1 { text-align: center; margin-bottom: 8px; font-size: 28px; }
+    .subtitle { text-align: center; color: #6b7280; margin-bottom: 24px; }
+    .score-box {
+      position: sticky; top: 10px; z-index: 10; background: #111827; color: white;
+      padding: 14px 18px; border-radius: 14px; margin-bottom: 18px; font-weight: bold;
+      display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    }
+    .button-row { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+    button {
+      flex: 1; padding: 13px 14px; border: none; border-radius: 12px;
+      background: #111827; color: white; font-size: 15px; font-weight: bold; cursor: pointer;
+    }
+    button:hover { background: #374151; }
+    .secondary { background: #4b5563; }
+    .question {
+      border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px;
+      margin-bottom: 18px; background: #fafafa;
+    }
+    .question h2 { margin-top: 0; font-size: 18px; line-height: 1.45; }
+    .theme {
+      display: inline-block; margin-bottom: 8px; padding: 4px 9px; border-radius: 999px;
+      background: #eef2ff; color: #3730a3; font-size: 12px; font-weight: bold;
+    }
+    .option {
+      display: block; background: white; margin: 8px 0; padding: 11px 13px;
+      border-radius: 10px; border: 1px solid #e5e7eb; cursor: pointer;
+    }
+    .option:hover { background: #f3f4f6; }
+    .option input { margin-right: 8px; }
+    .option.correct-choice { border-color: #10b981; background: #ecfdf5; color: #065f46; font-weight: bold; }
+    .option.wrong-choice { border-color: #ef4444; background: #fef2f2; color: #991b1b; font-weight: bold; }
+    .correction { display: none; margin-top: 14px; padding: 14px; border-radius: 10px; font-size: 14px; }
+    .correction.correct { background: #ecfdf5; border-left: 5px solid #10b981; color: #065f46; }
+    .correction.wrong { background: #fef2f2; border-left: 5px solid #ef4444; color: #7f1d1d; }
+    .correction strong { display: block; margin-bottom: 6px; font-size: 15px; }
+    @media (max-width: 640px) {
+      body { padding: 12px; }
+      .container { padding: 16px; }
+      h1 { font-size: 22px; }
+      .score-box { font-size: 14px; }
+      .button-row { flex-direction: column; }
+      .question { padding: 14px; }
+      .question h2 { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>QCM Mathématiques — Prépa</h1>
+    <p class="subtitle">30 questions tirées aléatoirement dans une base difficile — correction immédiate au clic</p>
+    <div class="score-box">
+      <span id="scoreText">Score : 0 / 30</span>
+      <span id="answeredText">Répondues : 0 / 30</span>
+      <span id="percentText">0%</span>
+    </div>
+    <div class="button-row">
+      <button type="button" onclick="startNewTest()">Nouveau test aléatoire</button>
+      <button type="button" class="secondary" onclick="resetQuiz()">Réinitialiser ce test</button>
+    </div>
+    <form id="quizForm"></form>
+  </div>
+
+  <script>
+    const TEST_SIZE = 30;
+
+    const questionBank = [
+      {
+        theme: "Analyse — équivalents",
+        question: "Quelle est la limite de (e^{sin x} - e^x) / x² lorsque x tend vers 0 ?",
+        options: ["0", "-1/2", "1/2", "-1"],
+        answer: "A",
+        explanation: "On écrit e^{sin x}-e^x = e^x(e^{sin x-x}-1). Or sin x - x = -x³/6 + o(x³), donc e^{sin x-x}-1 ~ sin x-x. Le numérateur est d’ordre x³. Divisé par x², il tend vers 0."
+      },
+      {
+        theme: "Analyse — développements limités",
+        question: "Quelle est la limite de (ln(1+x)-x+x²/2-x³/3)/x⁴ lorsque x tend vers 0 ?",
+        options: ["-1/4", "1/4", "1/3", "0"],
+        answer: "A",
+        explanation: "ln(1+x)=x-x²/2+x³/3-x⁴/4+o(x⁴). Après simplification, il reste -x⁴/4+o(x⁴)."
+      },
+      {
+        theme: "Analyse — équivalents",
+        question: "Quelle est la limite de (1 - cos x - x²/2) / x⁴ lorsque x tend vers 0 ?",
+        options: ["1/24", "-1/24", "-1/12", "0"],
+        answer: "B",
+        explanation: "cos x = 1 - x²/2 + x⁴/24 + o(x⁴). Donc 1-cos x-x²/2 = -x⁴/24+o(x⁴)."
+      },
+      {
+        theme: "Analyse — équivalents",
+        question: "Quelle est la limite de (tan x - sin x) / x³ lorsque x tend vers 0 ?",
+        options: ["1/2", "1/3", "1/6", "0"],
+        answer: "A",
+        explanation: "tan x=x+x³/3+o(x³) et sin x=x-x³/6+o(x³). Donc tan x-sin x=x³/2+o(x³)."
+      },
+      {
+        theme: "Analyse — intégrales impropres",
+        question: "Quelle est la nature de ∫₂^∞ 1/(x ln x) dx ?",
+        options: ["Convergente", "Divergente", "Égale à 1", "Oscillante"],
+        answer: "B",
+        explanation: "Une primitive de 1/(x ln x) est ln(ln x), qui tend vers +∞. L’intégrale diverge."
+      },
+      {
+        theme: "Analyse — intégrales impropres",
+        question: "Quelle est la nature de ∫₂^∞ 1/(x(ln x)²) dx ?",
+        options: ["Convergente", "Divergente", "Non définie", "Égale à +∞"],
+        answer: "A",
+        explanation: "Avec u=ln x, du=dx/x. L’intégrale devient ∫1/u² du, convergente à l’infini."
+      },
+      {
+        theme: "Analyse — Rolle",
+        question: "Soit f continue sur [a,b], dérivable sur ]a,b[, avec f(a)=f(b). Que garantit le théorème de Rolle ?",
+        options: ["Il existe c tel que f(c)=0", "Il existe c tel que f'(c)=0", "f est constante", "f est convexe"],
+        answer: "B",
+        explanation: "Rolle garantit l’existence d’un c dans ]a,b[ tel que f'(c)=0. Il ne dit pas que f est constante."
+      },
+      {
+        theme: "Analyse — convexité",
+        question: "Si f''(x)<0 sur un intervalle, alors f est :",
+        options: ["Convexe", "Concave", "Croissante", "Périodique"],
+        answer: "B",
+        explanation: "f''<0 signifie que f' est décroissante. La courbe est tournée vers le bas : f est concave."
+      },
+
+      {
+        theme: "Suites — équivalents",
+        question: "Quelle est la limite de n²(ln(1+1/n)-1/n) ?",
+        options: ["0", "-1/2", "1/2", "-1"],
+        answer: "B",
+        explanation: "ln(1+u)=u-u²/2+o(u²). Avec u=1/n, on obtient -1/(2n²)+o(1/n²), puis la limite -1/2."
+      },
+      {
+        theme: "Suites — équivalents",
+        question: "Quelle est la limite de n³(sin(1/n)-1/n) ?",
+        options: ["0", "-1/6", "1/6", "-1/2"],
+        answer: "B",
+        explanation: "sin u=u-u³/6+o(u³). Avec u=1/n, la différence vaut -1/(6n³)+o(1/n³)."
+      },
+      {
+        theme: "Suites — croissance comparée",
+        question: "Quelle est la limite de n^5 / 2^n lorsque n tend vers +∞ ?",
+        options: ["0", "1", "+∞", "5"],
+        answer: "A",
+        explanation: "Une exponentielle de base strictement supérieure à 1 domine toute puissance de n. Le quotient tend vers 0."
+      },
+      {
+        theme: "Suites — récurrence",
+        question: "Soit u₀>0 et u_{n+1}=√u_n. Si u₀≠1, vers quoi u_n converge-t-elle ?",
+        options: ["0", "1", "+∞", "Elle diverge toujours"],
+        answer: "B",
+        explanation: "Une limite l>0 vérifierait l=√l, donc l=1. La dynamique rapproche les termes positifs de 1."
+      },
+      {
+        theme: "Suites — sous-suites",
+        question: "Si u_{2n} et u_{2n+1} convergent vers deux limites différentes, alors u_n :",
+        options: ["Converge vers leur moyenne", "Diverge", "Converge vers 0", "Est croissante"],
+        answer: "B",
+        explanation: "Si u_n convergeait, toutes ses sous-suites auraient la même limite. Deux limites différentes impliquent la divergence."
+      },
+      {
+        theme: "Suites — équivalents",
+        question: "La suite u_n = n²(1 - cos(1/n)) converge vers :",
+        options: ["0", "1/2", "1", "+∞"],
+        answer: "B",
+        explanation: "1-cos x ~ x²/2. Avec x=1/n, on obtient 1-cos(1/n) ~ 1/(2n²)."
+      },
+
+      {
+        theme: "Séries — Riemann",
+        question: "La série Σ 1/n^{3/2} est :",
+        options: ["Divergente", "Convergente", "Alternée", "Géométrique"],
+        answer: "B",
+        explanation: "C’est une série de Riemann de paramètre α=3/2. Elle converge car α>1."
+      },
+      {
+        theme: "Séries — Bertrand",
+        question: "La série Σ 1/(n ln n) pour n≥2 est :",
+        options: ["Convergente", "Divergente", "Absolument convergente", "Géométrique"],
+        answer: "B",
+        explanation: "C’est le cas critique de Bertrand. L’intégrale associée diverge comme ln(ln x)."
+      },
+      {
+        theme: "Séries — Bertrand",
+        question: "La série Σ 1/(n(ln n)^3) pour n≥2 est :",
+        options: ["Convergente", "Divergente", "Alternée", "Non définie"],
+        answer: "A",
+        explanation: "Pour Σ1/(n(ln n)^α), la série converge si α>1. Ici α=3."
+      },
+      {
+        theme: "Séries — alternées",
+        question: "La série Σ(-1)^n / ln(n) pour n≥2 est :",
+        options: ["Divergente", "Convergente par critère des séries alternées", "Absolument convergente", "Géométrique"],
+        answer: "B",
+        explanation: "1/ln n tend vers 0 et décroît à partir d’un certain rang. La série alternée converge par Leibniz."
+      },
+      {
+        theme: "Séries — d'Alembert",
+        question: "Pour u_n=n!/n^n, que vaut la limite de u_{n+1}/u_n ?",
+        options: ["0", "1/e", "1", "e"],
+        answer: "B",
+        explanation: "u_{n+1}/u_n=(n/(n+1))^n=(1/(1+1/n))^n, qui tend vers e^{-1}."
+      },
+      {
+        theme: "Séries entières",
+        question: "Quel est le rayon de convergence de Σ n²x^n ?",
+        options: ["0", "1", "2", "+∞"],
+        answer: "B",
+        explanation: "Le facteur polynomial n² ne modifie pas le rayon de Σx^n. Le rayon vaut 1."
+      },
+      {
+        theme: "Séries entières",
+        question: "Quel est le rayon de convergence de Σ n! x^n ?",
+        options: ["0", "1", "e", "+∞"],
+        answer: "A",
+        explanation: "Par d’Alembert, |u_{n+1}/u_n|=(n+1)|x|, qui diverge pour tout x≠0. Rayon 0."
+      },
+
+      {
+        theme: "Algèbre linéaire — noyau image",
+        question: "Soit f:E→F linéaire avec dim(E)=5 et rg(f)=3. Quelle est dim Ker(f) ?",
+        options: ["1", "2", "3", "5"],
+        answer: "B",
+        explanation: "Théorème du rang : dim(E)=dim Ker(f)+rg(f). Donc 5=dim Ker(f)+3, d’où dim Ker(f)=2."
+      },
+      {
+        theme: "Algèbre linéaire — projecteurs",
+        question: "Une application linéaire p est un projecteur si et seulement si :",
+        options: ["p²=0", "p²=p", "p²=Id", "p est inversible"],
+        answer: "B",
+        explanation: "Un projecteur vérifie p∘p=p : projeter une deuxième fois ne change plus rien."
+      },
+      {
+        theme: "Algèbre linéaire — symétries",
+        question: "Une application linéaire s est une symétrie si elle vérifie :",
+        options: ["s²=0", "s²=s", "s²=Id", "s est nilpotente"],
+        answer: "C",
+        explanation: "Une symétrie est une involution : appliquer deux fois s redonne l’identité."
+      },
+      {
+        theme: "Algèbre linéaire — diagonalisation",
+        question: "Une matrice diagonalisable de taille n possède :",
+        options: ["n valeurs propres distinctes nécessairement", "Une base de vecteurs propres", "Un déterminant nul", "Une trace nulle"],
+        answer: "B",
+        explanation: "La diagonalisabilité signifie l’existence d’une base de vecteurs propres. n valeurs propres distinctes suffit, mais n’est pas nécessaire."
+      },
+      {
+        theme: "Algèbre linéaire — matrices semblables",
+        question: "Deux matrices semblables ont nécessairement :",
+        options: ["Les mêmes coefficients", "La même trace et le même déterminant", "La même base propre", "Le même inverse uniquement"],
+        answer: "B",
+        explanation: "Elles représentent le même endomorphisme dans deux bases. Elles ont le même polynôme caractéristique."
+      },
+      {
+        theme: "Algèbre linéaire — théorème spectral",
+        question: "Toute matrice réelle symétrique est :",
+        options: ["Nilpotente", "Orthogonalement diagonalisable", "De déterminant nul", "Triangulaire stricte"],
+        answer: "B",
+        explanation: "C’est le théorème spectral réel : diagonalisable dans une base orthonormée."
+      },
+
+      {
+        theme: "Matrices — calcul",
+        question: "Soit A une matrice 2×2 avec tr(A)=4 et det(A)=3. Son polynôme caractéristique est :",
+        options: ["X²-4X+3", "X²+4X+3", "X²-3X+4", "X²+3X+4"],
+        answer: "A",
+        explanation: "Pour une 2×2 : χ_A(X)=X²-tr(A)X+det(A), donc X²-4X+3."
+      },
+      {
+        theme: "Matrices — puissances",
+        question: "Si A²=0, alors A est :",
+        options: ["Inversible", "Nilpotente", "Orthogonale", "Symétrique positive"],
+        answer: "B",
+        explanation: "Une matrice est nilpotente s’il existe k tel que A^k=0. Ici k=2."
+      },
+      {
+        theme: "Matrices — déterminant",
+        question: "Pour A de taille n×n, det(λA) vaut :",
+        options: ["λdet(A)", "λ²det(A)", "λ^n det(A)", "det(A)/λ"],
+        answer: "C",
+        explanation: "Chaque ligne est multipliée par λ. Il y a n lignes, donc le déterminant est multiplié par λ^n."
+      },
+      {
+        theme: "Matrices — inverse",
+        question: "Si A est inversible et λ est valeur propre de A, alors une valeur propre de A^{-1} est :",
+        options: ["λ", "-λ", "1/λ", "λ²"],
+        answer: "C",
+        explanation: "Si Av=λv, alors A^{-1}v=(1/λ)v. Il faut λ≠0, garanti par l’inversibilité."
+      },
+      {
+        theme: "Matrices — diagonalisation",
+        question: "Si A est diagonalisable avec valeurs propres 2 et -1, les valeurs propres de A² sont :",
+        options: ["2 et -1", "4 et 1", "0 et 1", "-2 et 1"],
+        answer: "B",
+        explanation: "Les valeurs propres de A² sont les carrés des valeurs propres de A : 4 et 1."
+      },
+      {
+        theme: "Matrices — orthogonalité",
+        question: "Une matrice orthogonale Q vérifie :",
+        options: ["QᵀQ=I", "Q²=0", "Qᵀ=-Q", "det(Q)=0"],
+        answer: "A",
+        explanation: "Les colonnes de Q forment une base orthonormée, ce qui équivaut à QᵀQ=I."
+      },
+
+      {
+        theme: "Probabilités — lois usuelles",
+        question: "Si X suit une loi de Poisson de paramètre λ, alors Var(X) vaut :",
+        options: ["λ", "λ²", "1/λ", "e^{-λ}"],
+        answer: "A",
+        explanation: "Pour une loi de Poisson, l’espérance et la variance valent toutes deux λ."
+      },
+      {
+        theme: "Probabilités — binomiale",
+        question: "Si X suit une loi binomiale B(n,p), alors E(X) et Var(X) valent :",
+        options: ["np et np(1-p)", "p et p(1-p)", "n et p", "np et p"],
+        answer: "A",
+        explanation: "Une binomiale est somme de n Bernoulli indépendantes. Espérance np, variance np(1-p)."
+      },
+      {
+        theme: "Probabilités — indépendance",
+        question: "Si X et Y sont indépendantes, alors Var(X+Y) vaut :",
+        options: ["Var(X)+Var(Y)", "Var(X)Var(Y)", "E(X)+E(Y)", "0"],
+        answer: "A",
+        explanation: "Var(X+Y)=Var(X)+Var(Y)+2Cov(X,Y). L’indépendance annule la covariance."
+      },
+      {
+        theme: "Probabilités — espérance",
+        question: "Si X et Y sont indépendantes et intégrables, alors E(XY) vaut :",
+        options: ["E(X)+E(Y)", "E(X)E(Y)", "0", "Var(X)+Var(Y)"],
+        answer: "B",
+        explanation: "L’indépendance permet de factoriser l’espérance du produit."
+      },
+      {
+        theme: "Probabilités — conditionnement",
+        question: "La formule de Bayes permet principalement de calculer :",
+        options: ["P(A|B) à partir de P(B|A)", "Une dérivée", "Un déterminant", "Une primitive"],
+        answer: "A",
+        explanation: "Bayes donne P(A|B)=P(B|A)P(A)/P(B), lorsque P(B)>0."
+      },
+      {
+        theme: "Probabilités — Tchebychev",
+        question: "L'inégalité de Bienaymé-Tchebychev donne :",
+        options: ["P(|X-E(X)|≥a)≤Var(X)/a²", "P(X≥a)≤E(X)/a uniquement", "E(XY)=E(X)E(Y)", "Var(X)=E(X)"],
+        answer: "A",
+        explanation: "Elle contrôle la probabilité qu’une variable s’écarte de son espérance."
+      },
+
+      {
+        theme: "Équations différentielles",
+        question: "La solution de y'+3y=0 avec y(0)=2 est :",
+        options: ["2e^{3x}", "2e^{-3x}", "3e^{-2x}", "2+3x"],
+        answer: "B",
+        explanation: "y'=-3y. Les solutions sont Ce^{-3x}. Avec y(0)=2, C=2."
+      },
+      {
+        theme: "Équations différentielles",
+        question: "Les solutions de y''+9y=0 sont :",
+        options: ["Acos(3x)+Bsin(3x)", "Ae^{3x}+Be^{-3x}", "Ax+B", "Ce^{-9x}"],
+        answer: "A",
+        explanation: "r²+9=0, donc r=±3i. Les solutions réelles sont Acos(3x)+Bsin(3x)."
+      },
+      {
+        theme: "Équations différentielles",
+        question: "Les solutions de y''-9y=0 sont :",
+        options: ["Acos(3x)+Bsin(3x)", "Ae^{3x}+Be^{-3x}", "Ax+B", "Ce^{-9x}"],
+        answer: "B",
+        explanation: "r²-9=0, donc r=3 ou -3. Solutions : Ae^{3x}+Be^{-3x}."
+      },
+      {
+        theme: "Équations différentielles",
+        question: "Une solution particulière de y'-y=e^x est :",
+        options: ["xe^x", "e^x", "x", "0"],
+        answer: "A",
+        explanation: "Comme e^x est solution homogène, on essaie axe^x. On obtient xe^x."
+      },
+      {
+        theme: "Équations différentielles",
+        question: "L'équation y'=y² est :",
+        options: ["Linéaire", "Non linéaire", "Linéaire homogène", "À coefficients constants linéaire"],
+        answer: "B",
+        explanation: "La présence de y² rend l’équation non linéaire."
+      },
+
+      {
+        theme: "Complexes",
+        question: "Si z=re^{iθ}, alors z^n vaut :",
+        options: ["r^n e^{inθ}", "re^{inθ}", "nr e^{iθ}", "r^n e^{iθ}"],
+        answer: "A",
+        explanation: "Formule de Moivre : on élève le module à la puissance n et on multiplie l’argument par n."
+      },
+      {
+        theme: "Complexes",
+        question: "Les racines cubiques de l'unité sont :",
+        options: ["1 uniquement", "1, j, j²", "i et -i", "0, 1, -1"],
+        answer: "B",
+        explanation: "Les solutions de z³=1 sont e^{2ikπ/3}, k=0,1,2 : 1, j, j²."
+      },
+      {
+        theme: "Complexes",
+        question: "Si |z|=1, alors 1/z vaut :",
+        options: ["z", "-z", "conjugué de z", "0"],
+        answer: "C",
+        explanation: "z×conj(z)=|z|²=1, donc z^{-1}=conj(z)."
+      },
+      {
+        theme: "Complexes",
+        question: "Un argument de 1+i√3 est :",
+        options: ["π/6", "π/3", "π/2", "2π/3"],
+        answer: "B",
+        explanation: "Le module vaut 2, donc cos θ=1/2 et sin θ=√3/2. Un argument est π/3."
+      },
+
+      {
+        theme: "Polynômes",
+        question: "Si a est racine double de P, alors :",
+        options: ["P(a)=0 seulement", "P(a)=0 et P'(a)=0", "P'(a)≠0", "P est constant"],
+        answer: "B",
+        explanation: "Si P(X)=(X-a)²Q(X), alors P(a)=0 et P'(a)=0."
+      },
+      {
+        theme: "Polynômes",
+        question: "Le reste de la division de P(X) par X-a est :",
+        options: ["P(a)", "P'(a)", "a", "0 toujours"],
+        answer: "A",
+        explanation: "P(X)=(X-a)Q(X)+r. En évaluant en a, P(a)=r."
+      },
+      {
+        theme: "Polynômes",
+        question: "Si P est de degré 4 et possède 5 racines distinctes, alors :",
+        options: ["P est nul", "P est constant non nul", "P est irréductible", "P est de degré 5"],
+        answer: "A",
+        explanation: "Un polynôme non nul de degré 4 a au plus 4 racines. Avec 5 racines, il est nul."
+      },
+      {
+        theme: "Polynômes",
+        question: "X⁴-1 se factorise sur R en :",
+        options: ["(X-1)(X+1)(X²+1)", "(X²-1)²", "(X-1)^4", "(X²+1)^2"],
+        answer: "A",
+        explanation: "X⁴-1=(X²-1)(X²+1)=(X-1)(X+1)(X²+1)."
+      },
+
+      {
+        theme: "Dénombrement",
+        question: "Le coefficient de x³ dans (1+x)^7 est :",
+        options: ["21", "35", "42", "7"],
+        answer: "B",
+        explanation: "Par le binôme de Newton, le coefficient est C(7,3)=35."
+      },
+      {
+        theme: "Dénombrement",
+        question: "La somme des coefficients de (2+x)^n vaut :",
+        options: ["2^n", "3^n", "n!", "1"],
+        answer: "B",
+        explanation: "On évalue en x=1 : (2+1)^n=3^n."
+      }
+    ];
+
+    let questions = [];
+    let userAnswers = [];
+    const form = document.getElementById("quizForm");
+
+    function shuffleArray(array) {
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function startNewTest() {
+      questions = shuffleArray(questionBank).slice(0, Math.min(TEST_SIZE, questionBank.length));
+      userAnswers = new Array(questions.length).fill(null);
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function renderQuiz() {
+      form.innerHTML = "";
+      questions.forEach((q, index) => {
+        const qNumber = index + 1;
+        const block = document.createElement("div");
+        block.className = "question";
+        block.dataset.index = index;
+        block.dataset.answer = q.answer;
+
+        block.innerHTML = `
+          <span class="theme">${q.theme}</span>
+          <h2>${qNumber}. ${q.question}</h2>
+          ${q.options.map((option, i) => {
+            const letter = String.fromCharCode(65 + i);
+            return `
+              <label class="option" data-value="${letter}">
+                <input type="radio" name="q${qNumber}" value="${letter}">
+                ${letter}. ${option}
+              </label>
+            `;
+          }).join("")}
+          <div class="correction">
+            <strong></strong>
+            <div>${q.explanation}</div>
+          </div>
+        `;
+
+        form.appendChild(block);
+      });
+
+      document.querySelectorAll("input[type='radio']").forEach(input => {
+        input.addEventListener("change", handleAnswerClick);
+      });
+
+      updateScore();
+    }
+
+    function handleAnswerClick(event) {
+      const input = event.target;
+      const questionBlock = input.closest(".question");
+      const index = Number(questionBlock.dataset.index);
+      const selectedAnswer = input.value;
+      const correctAnswer = questionBlock.dataset.answer;
+
+      userAnswers[index] = selectedAnswer;
+
+      const labels = questionBlock.querySelectorAll(".option");
+      const correction = questionBlock.querySelector(".correction");
+      const correctionTitle = correction.querySelector("strong");
+
+      labels.forEach(label => {
+        label.classList.remove("correct-choice", "wrong-choice");
+
+        if (label.dataset.value === correctAnswer) {
+          label.classList.add("correct-choice");
+        }
+
+        if (label.dataset.value === selectedAnswer && selectedAnswer !== correctAnswer) {
+          label.classList.add("wrong-choice");
+        }
+      });
+
+      correction.style.display = "block";
+
+      if (selectedAnswer === correctAnswer) {
+        correction.className = "correction correct";
+        correctionTitle.textContent = `Bonne réponse : ${correctAnswer}`;
+      } else {
+        correction.className = "correction wrong";
+        correctionTitle.textContent = `Mauvaise réponse. La bonne réponse était : ${correctAnswer}`;
+      }
+
+      updateScore();
+    }
+
+    function updateScore() {
+      let answered = 0;
+      let score = 0;
+
+      userAnswers.forEach((answer, index) => {
+        if (answer !== null) {
+          answered++;
+          if (answer === questions[index].answer) score++;
+        }
+      });
+
+      const percent = questions.length === 0 ? 0 : Math.round((score / questions.length) * 100);
+
+      document.getElementById("scoreText").textContent = `Score : ${score} / ${questions.length}`;
+      document.getElementById("answeredText").textContent = `Répondues : ${answered} / ${questions.length}`;
+      document.getElementById("percentText").textContent = `${percent}%`;
+    }
+
+    function resetQuiz() {
+      userAnswers = new Array(questions.length).fill(null);
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    startNewTest();
+  </script>
+</body>
+</html>
