@@ -2,27 +2,27 @@ function examTemplates(course){
   const t=course.theme.toLowerCase();
   const m=course.module.toLowerCase();
   if(t.includes('série') && !t.includes('entière')) return [
-    ['Riemann-Bertrand','Étudier selon α la nature de Σ 1/[n(ln n)^α].','Utiliser le critère de Bertrand : convergence si α>1, divergence sinon.'],
-    ['Série alternée','Étudier Σ(-1)^n/ln(n), n≥2.','Le terme 1/ln(n) décroît vers 0 à partir d’un certain rang : convergence par Leibniz, non absolue.'],
-    ['Équivalent positif','Étudier Σ(1-cos(1/n)).','1-cos(u)~u²/2, donc terme équivalent à 1/(2n²) : convergence.'],
-    ['D’Alembert','Étudier Σ n!/n^n.','Le quotient u_{n+1}/u_n=(n/(n+1))^n tend vers e^{-1}<1.']
+    ['Riemann-Bertrand',"Étudier selon \\(\\alpha\\) la nature de \\(\\sum  1/[n(\\ln  n)^\\alpha ]\\).","Utiliser le critère de Bertrand : convergence si \\(\\alpha \\gt 1\\), divergence sinon."],
+    ['Série alternée',"Étudier \\(\\sum (-1)^n/\\ln (n), n\\geq 2\\).","Le terme \\(1/\\ln (n)\\) décroît vers 0 à partir d’un certain rang : convergence par Leibniz, non absolue."],
+    ['Équivalent positif',"Étudier \\(\\sum (1-\\cos (1/n))\\).","\\(1-\\cos (u)\\sim u^{2}/2\\), donc terme équivalent à \\(1/(2n^{2})\\) : convergence."],
+    ['D’Alembert',"Étudier \\(\\sum  n!/n^n\\).","Le quotient \\(u_{n+1}/u_n=(n/(n+1))^n\\) tend vers \\(e^{-1}\\lt 1\\)."]
   ];
   if(t.includes('intégrale')) return [
-    ['Riemann en 0','Étudier ∫_0^1 dx/x^α selon α.','Primitive de x^{-α}; convergence si α<1.'],
-    ['Riemann à l’infini','Étudier ∫_1^∞ dx/x^α selon α.','Convergence si α>1.'],
-    ['Bertrand intégral','Étudier ∫_2^∞ dx/[x(ln x)^α].','Poser u=ln x ; convergence si α>1.'],
-    ['IPP impropre','Calculer ∫_1^∞ ln(x)/x² dx.','Intégrer par parties ; le bord tend vers 0 et il reste ∫1/x².']
+    ['Riemann en 0',"Étudier \\(\\int _0^1 dx/x^\\alpha\\) selon \\(\\alpha\\).","Primitive de \\(x^{-\\alpha }\\); convergence si \\(\\alpha \\lt 1\\)."],
+    ['Riemann à l’infini',"Étudier \\(\\int _1^\\infty  dx/x^\\alpha\\) selon \\(\\alpha\\).","Convergence si \\(\\alpha \\gt 1\\)."],
+    ['Bertrand intégral',"Étudier \\(\\int _2^\\infty  dx/[x(\\ln  x)^\\alpha ]\\).","Poser \\(u=\\ln  x\\) ; convergence si \\(\\alpha \\gt 1\\)."],
+    ['IPP impropre',"Calculer \\(\\int _1^\\infty  \\ln (x)/x^{2} dx\\).","Intégrer par parties ; le bord tend vers 0 et il reste \\(\\int 1/x^{2}\\)."]
   ];
   if(t.includes('série entière')) return [
-    ['Rayon de convergence','Déterminer le rayon de convergence de Σn²x^n, Σn!x^n et Σx^n/n!.','Appliquer d’Alembert à |a_nx^n|. Les rayons sont 1, 0 et +∞.'],
-    ['Somme par dérivation','À partir de Σx^n, obtenir Σnx^{n-1}.','Dériver 1/(1-x) sur ]-1,1[, résultat 1/(1-x)^2.'],
-    ['Étude des bornes','Étudier l’intervalle de convergence de Σx^n/n.','R=1 ; x=1 diverge, x=-1 converge par alternance.'],
-    ['Fonction somme','Montrer que f(x)=Σx^n/n! vérifie f’=f.','Dériver terme à terme dans le rayon infini et reconnaître la même série.']
+    ['Rayon de convergence',"Déterminer le rayon de convergence de \\(\\sum n^{2}x^n, \\sum n!x^n\\) et \\(\\sum x^n/n!\\).","Appliquer d’Alembert à \\(|a_nx^n|\\). Les rayons sont \\(1, 0\\) et \\(+\\infty\\)."],
+    ['Somme par dérivation',"À partir de \\(\\sum x^n\\), obtenir \\(\\sum nx^{n-1}\\).","Dériver \\(1/(1-x)\\) sur \\(]-1,1[\\), résultat \\(1/(1-x)^2\\)."],
+    ['Étude des bornes',"Étudier l’intervalle de convergence de \\(\\sum x^n/n\\).","\\(R=1\\) ; \\(x=1\\) diverge, \\(x=-1\\) converge par alternance."],
+    ['Fonction somme',"Montrer que \\(f(x)=\\sum x^n/n!\\) vérifie \\(f'=f\\).",'Dériver terme à terme dans le rayon infini et reconnaître la même série.']
   ];
   if(m.includes('algèbre') || t.includes('matrice') || t.includes('système') || t.includes('déterminant') || t.includes('diagonal')) return [
     ['Rang avec paramètre','Pour une matrice A(a), déterminer le rang et Ker(A) selon a.','Effectuer Gauss, identifier les pivots et traiter les valeurs de a qui les annulent.'],
     ['Diagonalisation','Étudier la diagonalisabilité d’une matrice triangulaire 3×3.','Lire les valeurs propres, calculer les sous-espaces propres et comparer la somme des dimensions à 3.'],
-    ['Projecteur ou symétrie','Étudier un endomorphisme vérifiant p²=p ou s²=Id.','Utiliser le polynôme annulateur, les valeurs propres possibles et la décomposition en noyau/image.'],
+    ['Projecteur ou symétrie',"Étudier un endomorphisme vérifiant \\(p^{2}=p\\) ou \\(s^{2}=\\operatorname{Id}\\).",'Utiliser le polynôme annulateur, les valeurs propres possibles et la décomposition en noyau/image.'],
     ['Déterminant structuré','Calculer un déterminant par opérations élémentaires.','Créer des zéros par lignes/colonnes puis développer ou triangulariser.']
   ];
   if(m.includes('probabilités') || t.includes('variable') || t.includes('markov') || t.includes('dénombrement') || t.includes('couple')) return [
@@ -32,10 +32,10 @@ function examTemplates(course){
     ['Inégalités probabilistes','Majorer une probabilité d’écart à la moyenne.','Calculer variance puis appliquer Markov ou Tchebychev.']
   ];
   if(t.includes('complexe')) return [
-    ['Forme trigonométrique','Écrire 1+i√3 sous forme trigonométrique puis calculer sa puissance 6.','Module 2, argument π/3 ; utiliser la formule de Moivre.'],
-    ['Racines de l’unité','Résoudre z^n=1 et représenter les solutions.','Solutions e^{2ikπ/n}, k=0,…,n-1.'],
-    ['Équation complexe','Résoudre z²=-4 puis z²=1+i.','Utiliser la forme trigonométrique ou poser z=a+ib.'],
-    ['Conjugué et module','Simplifier 1/z lorsque |z|=1.','Utiliser z\u0305z=|z|², donc 1/z=\u0305z si |z|=1.']
+    ['Forme trigonométrique',"Écrire \\(1+i\\sqrt{3}\\) sous forme trigonométrique puis calculer sa puissance 6.","Module 2, argument \\(\\pi /3\\) ; utiliser la formule de Moivre."],
+    ['Racines de l’unité',"Résoudre \\(z^n=1\\) et représenter les solutions.","Solutions \\(e^{2ik\\pi /n}, k=0,\\ldots ,n-1\\)."],
+    ['Équation complexe',"Résoudre \\(z^{2}=-4\\) puis \\(z^{2}=1+i\\).","Utiliser la forme trigonométrique ou poser \\(z=a+ib\\)."],
+    ['Conjugué et module',"Simplifier \\(1/z\\) lorsque \\(|z|=1\\).","Utiliser \\(z\\overline{z}=|z|^{2}\\), donc \\(1/z=\\overline{z}\\) si \\(|z|=1\\)."]
   ];
   return [
     ['Limite et équivalents','Calculer une limite avec annulation des termes dominants.','Écrire les développements limités au bon ordre et isoler le premier terme non nul.'],
